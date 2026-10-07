@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,8 @@ func getCapturer() (*Capturer, error) {
 	defer mu.Unlock()
 
 	if capturer == nil {
+		log.Print("Initializing new capturer")
+
 		c, err := NewCapturer()
 		if err != nil {
 			return nil, err

@@ -13,13 +13,14 @@ import (
 
 const PRIMARY_MONITOR = 0
 const FRAME_CAPTURE_TIMEOUT = 1000
-const RESIZING_FACTOR = 4
+const RESIZING_FACTOR = 2
 
 type Capturer struct {
 	dd     *dda.DesktopDuplication
 	width  int
 	height int
 	buffer []byte
+	img    *image.RGBA
 }
 
 func NewCapturer() (*Capturer, error) {
@@ -34,11 +35,14 @@ func NewCapturer() (*Capturer, error) {
 		return nil, fmt.Errorf("failed to detect screen size: %w", err)
 	}
 
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+
 	return &Capturer{
 		dd:     dd,
 		width:  width,
 		height: height,
 		buffer: make([]byte, width*height*4),
+		img:    img,
 	}, nil
 }
 
@@ -63,22 +67,20 @@ func (c *Capturer) CaptureFrame() error {
 }
 
 func (c *Capturer) ConvertToPNG() ([]byte, error) {
-	img := image.NewRGBA(image.Rect(0, 0, c.width, c.height))
-
 	for i := 0; i < len(c.buffer); i += 4 {
-		img.Pix[i+0] = c.buffer[i+2] // R
-		img.Pix[i+1] = c.buffer[i+1] // G
-		img.Pix[i+2] = c.buffer[i+0] // B
-		img.Pix[i+3] = 255
+		c.img.Pix[i+0] = c.buffer[i+2] // R
+		c.img.Pix[i+1] = c.buffer[i+1] // G
+		c.img.Pix[i+2] = c.buffer[i+0] // B
+		c.img.Pix[i+3] = 255
 	}
 
 	// TODO: resize
 	resizedRect := image.Rect(0, 0, c.width/RESIZING_FACTOR, c.height/RESIZING_FACTOR)
 	resizedImg := image.NewRGBA(resizedRect)
-	xdraw.NearestNeighbor.Scale(resizedImg, resizedRect, img, img.Bounds(), draw.Over, nil)
+	xdraw.NearestNeighbor.Scale(resizedImg, resizedRect, c.img, c.img.Bounds(), draw.Over, nil)
 
 	var out bytes.Buffer
-	if err := png.Encode(&out, img); err != nil {
+	if err := png.Encode(&out, c.img); err != nil {
 		return nil, fmt.Errorf("failed to encode PNG: %w", err)
 	}
 
