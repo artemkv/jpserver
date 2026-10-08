@@ -11,11 +11,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Serve(router *gin.Engine, port string) {
+func Serve(router *gin.Engine, addr string) {
 	ctx, restoreInterrupt := getNotifyContextForInterruptSignals()
 	defer restoreInterrupt()
 
-	httpServer := startServingAsync(router, port)
+	httpServer := startServingAsync(router, addr)
 	waitForInterruptSignal(ctx)
 	restoreInterrupt()
 	shutDownWithTimeout(httpServer, 5*time.Second)
@@ -29,10 +29,11 @@ func waitForInterruptSignal(ctx context.Context) {
 	<-ctx.Done()
 }
 
-func startServingAsync(router *gin.Engine, port string) *http.Server {
-	log.Printf("Starting server on port %s", port)
+func startServingAsync(router *gin.Engine, addr string) *http.Server {
+	log.Printf("Starting server on %s", addr)
 	httpServer := &http.Server{
-		Addr:    port,
+
+		Addr:    addr,
 		Handler: router,
 	}
 	go listenAndServe(httpServer)

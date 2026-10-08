@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
-	"strings"
 
 	"artemkv.net/jpserver/app"
 	"artemkv.net/jpserver/server"
@@ -14,8 +14,10 @@ func main() {
 	// load .env
 	LoadDotEnv()
 
-	// determine port
-	port := GetOptionalString("JPSERVER_PORT", ":9999")
+	// connection endpoint
+	host := GetOptionalString("JPSERVER_HOST", detectLocalIP())
+	port := GetOptionalString("JPSERVER_PORT", "9999")
+	endpoint := fmt.Sprintf("%s:%s", host, port)
 
 	// configure router
 	allowedOrigins := GetOptionalString(
@@ -24,39 +26,17 @@ func main() {
 	router := gin.New()
 	app.SetupRouter(router, allowedOrigins)
 
-	// helps to connect
-	suggestConnectionString(port)
-
 	// start the server
-	server.Serve(router, port)
+	server.Serve(router, endpoint)
 }
 
-func suggestConnectionString(port string) {
-	interfaces, err := net.Interfaces()
+func detectLocalIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		return
+		log.Print("Could not detect local IP")
+		return ""
 	}
-	for _, iface := range interfaces {
-		addrs, err := iface.Addrs()
-		if err != nil {
-			continue
-		}
-
-		for _, addr := range addrs {
-			ipNet, ok := addr.(*net.IPNet)
-			if !ok {
-				continue
-			}
-
-			ip := ipNet.IP
-
-			if ip.IsLoopback() || ip.To4() == nil {
-				continue
-			}
-
-			if strings.HasPrefix(ip.String(), "192.168.0.") {
-				fmt.Printf("***** Use this endpoint: %s:%s *****\n", ip.String(), port)
-			}
-		}
-	}
+	defer conn.Close()
+	localIP := conn.LocalAddr().(*net.UDPAddr).IP
+	return localIP.String()
 }
