@@ -8,6 +8,7 @@ The web server that exposes the endpoint allowing to retrieve the screenshot of 
 JPSERVER_HOST=192.168.0.13
 JPSERVER_PORT=9999
 JPSERVER_ALLOW_ORIGIN=https://localhost
+JPSERVER_CODE=824230
 ```
 
 `JPSERVER_HOST`
@@ -24,6 +25,11 @@ Optional, allows to configure the port to listen on; defaults to "9999"
 
 Optional, allows to configure the allowed origin for CORS; defaults to "https://localhost"
 This should match the origin of the running app (reported in the log for every request)
+
+`JPSERVER_CODE`
+
+Allows to specify fixed access code
+If not provided, the new access code is generated every time randomly
 
 ## API
 

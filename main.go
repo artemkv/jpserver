@@ -21,9 +21,14 @@ func main() {
 	port := GetOptionalString("JPSERVER_PORT", "9999")
 	endpoint := fmt.Sprintf("%s:%s", host, port)
 
-	accessCode, err := generateAccessCode()
-	if err != nil {
-		log.Fatal("Could not generate the access code")
+	// control access
+	accessCode := GetOptionalString("JPSERVER_CODE", "")
+	if accessCode == "" {
+		var err error
+		accessCode, err = generateAccessCode()
+		if err != nil {
+			log.Fatal("Could not generate the access code")
+		}
 	}
 	fmt.Printf("***** ENDPOINT: %s, ACCESS CODE: %s *****\n", endpoint, accessCode)
 
