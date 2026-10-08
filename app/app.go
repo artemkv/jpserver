@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(router *gin.Engine, allowedOrigins string) {
+func SetupRouter(router *gin.Engine, allowedOrigins string, accessCode string) {
 	// setup logger
 	router.Use(requestLogger())
 
@@ -22,10 +22,21 @@ func SetupRouter(router *gin.Engine, allowedOrigins string) {
 	router.Use(cors.New(getCorsConfig(allowedOriginsArr)))
 
 	// do business
-	router.GET("/frame", handleFrame)
+	router.GET("/frame", HandleWithAccessCode(accessCode, handleFrame))
 
 	// handle 404
 	router.NoRoute(notFoundHandler())
+}
+
+func HandleWithAccessCode(accessCode string, handler gin.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		code := c.Query("code")
+		if code != accessCode {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+		handler(c)
+	}
 }
 
 func getCorsConfig(allowedOrigins []string) cors.Config {

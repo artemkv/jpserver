@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"fmt"
+	"io"
 	"log"
 	"net"
 
@@ -19,12 +21,18 @@ func main() {
 	port := GetOptionalString("JPSERVER_PORT", "9999")
 	endpoint := fmt.Sprintf("%s:%s", host, port)
 
+	accessCode, err := generateAccessCode()
+	if err != nil {
+		log.Fatal("Could not generate the access code")
+	}
+	fmt.Printf("***** ENDPOINT: %s, ACCESS CODE: %s *****\n", endpoint, accessCode)
+
 	// configure router
 	allowedOrigins := GetOptionalString(
 		"JPSERVER_ALLOW_ORIGIN", "https://localhost")
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	app.SetupRouter(router, allowedOrigins)
+	app.SetupRouter(router, allowedOrigins, accessCode)
 
 	// start the server
 	server.Serve(router, endpoint)
@@ -39,4 +47,16 @@ func detectLocalIP() string {
 	defer conn.Close()
 	localIP := conn.LocalAddr().(*net.UDPAddr).IP
 	return localIP.String()
+}
+
+func generateAccessCode() (string, error) {
+	const table = "0123456789"
+	buffer := make([]byte, 6)
+	if _, err := io.ReadFull(rand.Reader, buffer); err != nil {
+		return "", err
+	}
+	for i, b := range buffer {
+		buffer[i] = table[b%byte(len(table))]
+	}
+	return string(buffer), nil
 }
