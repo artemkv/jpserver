@@ -13,7 +13,7 @@ import (
 
 const PRIMARY_MONITOR = 0
 const FRAME_CAPTURE_TIMEOUT = 1000
-const RESIZING_FACTOR = 2
+const RESIZING_FACTOR = 4
 
 type Capturer struct {
 	dd     *dda.DesktopDuplication

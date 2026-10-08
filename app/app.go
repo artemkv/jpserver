@@ -1,6 +1,8 @@
 package app
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"log"
 	"net/http"
@@ -36,6 +38,30 @@ func getCorsConfig(allowedOrigins []string) cors.Config {
 
 func toBinary(c *gin.Context, data []byte) {
 	c.Data(http.StatusOK, "application/octet-stream", data)
+}
+
+func toBinaryGzip(c *gin.Context, data []byte) {
+	c.Header("Content-Encoding", "gzip")
+	c.Header("Vary", "Accept-Encoding")
+	c.Data(http.StatusOK, "application/octet-stream", data)
+}
+
+func gzipBytes(data []byte) ([]byte, error) {
+	var buf bytes.Buffer
+	writer := gzip.NewWriter(&buf)
+
+	_, err := writer.Write(data)
+	if err != nil {
+		return nil, err
+	}
+
+	// Must close the writer to flush gzip data
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func toBadRequest(c *gin.Context, err error) {
