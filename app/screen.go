@@ -13,7 +13,14 @@ import (
 
 const PRIMARY_MONITOR = 0
 const FRAME_CAPTURE_TIMEOUT = 1000
-const RESIZING_FACTOR = 4
+
+// In % of the screen
+type Borders struct {
+	left   int
+	right  int
+	top    int
+	bottom int
+}
 
 type Capturer struct {
 	dd     *dda.DesktopDuplication
@@ -66,7 +73,8 @@ func (c *Capturer) CaptureFrame() error {
 	}
 }
 
-func (c *Capturer) ConvertToPNG() ([]byte, error) {
+func (c *Capturer) ConvertToPNG(borders Borders, resizeFactor int) ([]byte, error) {
+	// Copy the buffer into image
 	for i := 0; i < len(c.buffer); i += 4 {
 		c.img.Pix[i+0] = c.buffer[i+2] // R
 		c.img.Pix[i+1] = c.buffer[i+1] // G
@@ -74,15 +82,31 @@ func (c *Capturer) ConvertToPNG() ([]byte, error) {
 		c.img.Pix[i+3] = 255
 	}
 
-	// TODO: resize
-	resizedRect := image.Rect(0, 0, c.width/RESIZING_FACTOR, c.height/RESIZING_FACTOR)
-	resizedImg := image.NewRGBA(resizedRect)
-	xdraw.NearestNeighbor.Scale(resizedImg, resizedRect, c.img, c.img.Bounds(), draw.Over, nil)
+	// Clipping area
+	srcWidth := c.img.Bounds().Dx()
+	srcHeight := c.img.Bounds().Dy()
+	cutoutRect := image.Rect(
+		srcWidth*borders.left/100,
+		srcHeight*borders.top/100,
+		srcWidth-srcWidth*borders.right/100,
+		srcHeight-srcHeight*borders.bottom/100)
 
+	// Target image
+	resizedRect := image.Rect(
+		0,
+		0,
+		cutoutRect.Dx()/resizeFactor,
+		cutoutRect.Dy()/resizeFactor)
+
+	// Resize
+	resizedImg := image.NewRGBA(resizedRect)
+	xdraw.NearestNeighbor.Scale(
+		resizedImg, resizedRect, c.img, cutoutRect, draw.Over, nil)
+
+	// PNG encode the result
 	var out bytes.Buffer
-	if err := png.Encode(&out, c.img); err != nil {
+	if err := png.Encode(&out, resizedImg); err != nil {
 		return nil, fmt.Errorf("failed to encode PNG: %w", err)
 	}
-
 	return out.Bytes(), nil
 }

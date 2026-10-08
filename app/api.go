@@ -44,6 +44,14 @@ func releaseCapturer() {
 }
 
 func handleFrame(c *gin.Context) {
+	borders := Borders{
+		left:   getQueryAsInt(c, "left", 0),
+		right:  getQueryAsInt(c, "right", 0),
+		top:    getQueryAsInt(c, "top", 0),
+		bottom: getQueryAsInt(c, "bottom", 0),
+	}
+	resizeFactor := getQueryAsInt(c, "resize", 1)
+
 	cp, err := getCapturer()
 	if err != nil {
 		fmt.Printf("Could not initialize capturer: %v", err)
@@ -59,7 +67,7 @@ func handleFrame(c *gin.Context) {
 		return
 	}
 
-	png, err := cp.ConvertToPNG()
+	png, err := cp.ConvertToPNG(borders, resizeFactor)
 	if err != nil {
 		fmt.Printf("Failed to convert to png: %v", err)
 		toInternalServerError(c, fmt.Sprintf("Failed to convert to png: %v", err))

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -88,4 +89,13 @@ func notFoundHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"err": "Not found"})
 	}
+}
+
+func getQueryAsInt(c *gin.Context, key string, defaultValue int) int {
+	val := c.Query(key)
+	n, err := strconv.Atoi(val)
+	if err != nil {
+		return defaultValue
+	}
+	return n
 }
