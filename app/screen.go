@@ -74,29 +74,28 @@ func (c *Capturer) CaptureFrame() error {
 }
 
 func (c *Capturer) ConvertToPNG(borders Borders, resizeFactor int) ([]byte, error) {
-	// Copy the buffer into image
-	for i := 0; i < len(c.buffer); i += 4 {
-		c.img.Pix[i+0] = c.buffer[i+2] // R
-		c.img.Pix[i+1] = c.buffer[i+1] // G
-		c.img.Pix[i+2] = c.buffer[i+0] // B
-		c.img.Pix[i+3] = 255
+	// Calculate clipping area
+	x0cut := c.width * borders.left / 100
+	y0cut := c.height * borders.top / 100
+	x1cut := c.width - c.width*borders.right/100
+	y1cut := c.height - c.height*borders.bottom/100
+	cutoutRect := image.Rect(x0cut, y0cut, x1cut, y1cut)
+
+	// Copy the buffer into image, converting BGRA -> RGBA
+	// Only copy the cutout part
+	for y := y0cut; y < y1cut; y++ {
+		for x := x0cut; x < x1cut; x++ {
+			i := (y*c.width + x) * 4
+			c.img.Pix[i+0] = c.buffer[i+2] // R
+			c.img.Pix[i+1] = c.buffer[i+1] // G
+			c.img.Pix[i+2] = c.buffer[i+0] // B
+			c.img.Pix[i+3] = 255           // A
+		}
 	}
 
-	// Clipping area
-	srcWidth := c.img.Bounds().Dx()
-	srcHeight := c.img.Bounds().Dy()
-	cutoutRect := image.Rect(
-		srcWidth*borders.left/100,
-		srcHeight*borders.top/100,
-		srcWidth-srcWidth*borders.right/100,
-		srcHeight-srcHeight*borders.bottom/100)
-
 	// Target image
-	resizedRect := image.Rect(
-		0,
-		0,
-		cutoutRect.Dx()/resizeFactor,
-		cutoutRect.Dy()/resizeFactor)
+	resizedRect := image.Rect(0, 0,
+		cutoutRect.Dx()/resizeFactor, cutoutRect.Dy()/resizeFactor)
 
 	// Resize
 	resizedImg := image.NewRGBA(resizedRect)
