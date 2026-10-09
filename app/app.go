@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync/atomic"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -20,7 +22,10 @@ func SetupRouter(router *gin.Engine, accessCode string) {
 	router.Use(cors.New(getCorsConfig()))
 
 	// do business
-	router.GET("/frame", HandleWithAccessCode(accessCode, handleFrame))
+	router.GET("/frame",
+		WithMaxParallelRequests(1,
+			WithAccessCode(accessCode,
+				handleFrame)))
 
 	// handle 404
 	router.NoRoute(notFoundHandler())
@@ -35,14 +40,30 @@ func getCorsConfig() cors.Config {
 	}
 }
 
-func HandleWithAccessCode(accessCode string, handler gin.HandlerFunc) gin.HandlerFunc {
+func WithAccessCode(accessCode string, handler gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		code := c.Query("code")
 		if code != accessCode {
+			time.Sleep(5 * time.Second)
 			c.Status(http.StatusUnauthorized)
 			return
 		}
 		handler(c)
+	}
+}
+
+func WithMaxParallelRequests(maxParallelRequests int32, handler gin.HandlerFunc) gin.HandlerFunc {
+	var reqCount atomic.Int32
+
+	return func(c *gin.Context) {
+		if reqCount.Load() < maxParallelRequests {
+			reqCount.Add(1)
+			defer reqCount.Add(-1)
+
+			handler(c)
+		} else {
+			c.Status(http.StatusTooManyRequests)
+		}
 	}
 }
 
