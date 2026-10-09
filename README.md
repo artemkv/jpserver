@@ -4,9 +4,9 @@
 
 ![Demo](doc/demo.jpg)
 
-Starts web server with the endpoint allowing to retrieve the screenshot of the primary monitor.
+Starts web server exposing screen captures (from the primary monitor) over REST endpoint.
 
-Intended to work in tandem with jpterminal mobile app.
+Intended to work in tandem with **jpterminal** mobile app (Not yet released, name to be decided).
 
 ## Techinical requirements
 
