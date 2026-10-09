@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"log"
-	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -71,16 +70,6 @@ func handleFrame(c *gin.Context) {
 	if err != nil {
 		fmt.Printf("Failed to convert to png: %v", err)
 		toInternalServerError(c, fmt.Sprintf("Failed to convert to png: %v", err))
-		return
-	}
-
-	if strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
-		gzipped, err := gzipBytes(png)
-		if err != nil {
-			toInternalServerError(c, err.Error())
-			return
-		}
-		toBinaryGzip(c, gzipped)
 		return
 	}
 
