@@ -22,6 +22,11 @@ type Borders struct {
 	bottom int
 }
 
+type ImageCache struct {
+	rect image.Rectangle
+	img  *image.RGBA
+}
+
 type Capturer struct {
 	dd     *dda.DesktopDuplication
 	width  int
@@ -29,6 +34,7 @@ type Capturer struct {
 	buffer []byte
 	// re-using stuff across calls to avoid re-allocating
 	img       *image.RGBA
+	resizeImg ImageCache
 	pngBuffer bytes.Buffer
 }
 
@@ -46,13 +52,18 @@ func NewCapturer() (*Capturer, error) {
 
 	// to be re-used
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	imgCache := ImageCache{
+		rect: image.Rect(0, 0, 0, 0),
+		img:  nil,
+	}
 
 	return &Capturer{
-		dd:     dd,
-		width:  width,
-		height: height,
-		buffer: make([]byte, width*height*4),
-		img:    img,
+		dd:        dd,
+		width:     width,
+		height:    height,
+		buffer:    make([]byte, width*height*4),
+		img:       img,
+		resizeImg: imgCache,
 	}, nil
 }
 
@@ -96,12 +107,24 @@ func (c *Capturer) ConvertToPNG(borders Borders, resizeFactor int) ([]byte, erro
 		}
 	}
 
-	// Target image
+	// Target image rectangle
 	resizedRect := image.Rect(0, 0,
 		cutoutRect.Dx()/resizeFactor, cutoutRect.Dy()/resizeFactor)
 
+	// Resize target
+	var resizedImg *image.RGBA
+	if c.resizeImg.img != nil &&
+		c.resizeImg.rect == resizedRect {
+		// from cache
+		resizedImg = c.resizeImg.img
+	} else {
+		resizedImg = image.NewRGBA(resizedRect)
+		// cache
+		c.resizeImg.rect = resizedRect
+		c.resizeImg.img = resizedImg
+	}
+
 	// Resize
-	resizedImg := image.NewRGBA(resizedRect)
 	xdraw.NearestNeighbor.Scale(
 		resizedImg, resizedRect, c.img, cutoutRect, draw.Over, nil)
 
