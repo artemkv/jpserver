@@ -126,7 +126,7 @@ func (c *Capturer) ConvertToPNG(borders Borders, resizeFactor int) ([]byte, erro
 
 	// Resize
 	xdraw.NearestNeighbor.Scale(
-		resizedImg, resizedRect, c.img, cutoutRect, draw.Over, nil)
+		resizedImg, resizedRect, c.img, cutoutRect, draw.Src, nil)
 
 	// PNG encode the result
 	c.pngBuffer.Reset()
