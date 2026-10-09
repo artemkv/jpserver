@@ -2,6 +2,8 @@
 
 **Play Japanese games on PC and see an instant vocabulary break-down on your phone or tablet!**
 
+![Demo](doc/demo.jpg)
+
 Starts web server with the endpoint allowing to retrieve the screenshot of the primary monitor.
 
 Intended to work in tandem with jpterminal mobile app.
