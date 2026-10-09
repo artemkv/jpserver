@@ -27,7 +27,9 @@ type Capturer struct {
 	width  int
 	height int
 	buffer []byte
-	img    *image.RGBA
+	// re-using stuff across calls to avoid re-allocating
+	img       *image.RGBA
+	pngBuffer bytes.Buffer
 }
 
 func NewCapturer() (*Capturer, error) {
@@ -42,6 +44,7 @@ func NewCapturer() (*Capturer, error) {
 		return nil, fmt.Errorf("failed to detect screen size: %w", err)
 	}
 
+	// to be re-used
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	return &Capturer{
@@ -103,9 +106,9 @@ func (c *Capturer) ConvertToPNG(borders Borders, resizeFactor int) ([]byte, erro
 		resizedImg, resizedRect, c.img, cutoutRect, draw.Over, nil)
 
 	// PNG encode the result
-	var out bytes.Buffer
-	if err := png.Encode(&out, resizedImg); err != nil {
+	c.pngBuffer.Reset()
+	if err := png.Encode(&c.pngBuffer, resizedImg); err != nil {
 		return nil, fmt.Errorf("failed to encode PNG: %w", err)
 	}
-	return out.Bytes(), nil
+	return c.pngBuffer.Bytes(), nil
 }
