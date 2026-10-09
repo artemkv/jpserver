@@ -14,43 +14,48 @@ Intended to work in tandem with jpterminal mobile app.
 
 ## How to run
 
-- Start jpserver.exe
-- Scan the QR code in the app
-- Make sure your mobile phone and your laptop are connected to the same WiFi
+- Make sure your mobile phone and your laptop are on the same WiFi
+- Start `jpserver.exe` on your Windows PC
+- Scan the QR code in the mobile app
 - Play!
 
 ## Configuration
 
 We try to auto-detect the most suitable configuration parameters, but you can override the defaults using the environment variables.
 
-You can provide values for environment variables by creating `.env` (exactly like that, i.e. dot env) file next to the executable. For example:
+You can provide values for environment variables by creating `.env` (exactly like that, i.e. "dot env") file next to the executable. For example:
 
 ```
 JPSERVER_HOST=192.168.0.13
 JPSERVER_PORT=9999
+JPSERVER_CODE_LENGTH=20
 JPSERVER_CODE=824230
 ```
 
 `JPSERVER_HOST`
 
-Optional. Allows to configure the interface to listen on (the IP address of your network).
+_Optional._ Allows to configure the interface to listen on (the IP address of your network).
 
 But default, we try to auto-detect your local network IP and use it.
 
-If autodetect fails, defaults to empty string (same as "0.0.0.0", meaning "listen on all interfaces").
+If autodetect fails, defaults to empty string (same as `0.0.0.0`, meaning "listen on all interfaces").
 
 If you want to set it manually, use `ipconfig` to see the information about your network interfaces.
 
 `JPSERVER_PORT`
 
-Optional. Allows to configure the port to listen on; defaults to the first available port between `9991` and `9999`.
+_Optional._ Allows to configure the port to listen on; defaults to the first available port between `9991` and `9999`.
 Change this if, for some reason, the whole range is already in use.
+
+`JPSERVER_CODE_LENGTH`
+
+_Optional._ Allows to specify the length of the randomly generated access code. Default is 8 digits. If you are using `JPSERVER_CODE`, the value is ignored.
 
 `JPSERVER_CODE`
 
-Optional, allows to specify a fixed access code. By default, the new random access code is generated every time.
+_Optional._ Allows to specify a fixed access code. If not provided, the new random access code is generated every time. The length of the generated code is controlled by `JPSERVER_CODE_LENGTH`.
 
-## API
+## API (for integrating your own tools)
 
 `GET /frame`
 

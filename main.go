@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	ACCESS_CODE_LENGTH = 8
-	MIN_PORT           = 9991
-	MAX_PORT           = 9999
+	ACCESS_CODE_LENGTH_DEFAULT = 8
+	MIN_PORT                   = 9991
+	MAX_PORT                   = 9999
 )
 
 func main() {
@@ -26,7 +26,10 @@ func main() {
 	host := GetOptionalString("JPSERVER_HOST", getDefaultHost)
 	port := GetOptionalString("JPSERVER_PORT",
 		func() string { return getDefaultPort(host) })
-	accessCode := GetOptionalString("JPSERVER_CODE", getDefaultAccessCode)
+	accessCodeLength := GetOptionalInt("JPSERVER_CODE_LENGTH",
+		func() int { return ACCESS_CODE_LENGTH_DEFAULT })
+	accessCode := GetOptionalString("JPSERVER_CODE",
+		func() string { return getDefaultAccessCode(accessCodeLength) })
 
 	addr := fmt.Sprintf("%s:%s", host, port)
 	showConnectionInfo(addr, accessCode)
@@ -53,8 +56,8 @@ func getDefaultPort(host string) string {
 	return fmt.Sprintf("%d", port)
 }
 
-func getDefaultAccessCode() string {
-	accessCode, err := generateAccessCode(ACCESS_CODE_LENGTH)
+func getDefaultAccessCode(accessCodeLength int) string {
+	accessCode, err := generateAccessCode(accessCodeLength)
 	if err != nil {
 		log.Fatal(err)
 	}
