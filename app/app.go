@@ -99,7 +99,7 @@ func notFoundHandler() gin.HandlerFunc {
 	}
 }
 
-func getQueryAsInt(c *gin.Context, key string, defaultValue int) int {
+func getQueryParamAsInt(c *gin.Context, key string, defaultValue int) int {
 	val := c.Query(key)
 	n, err := strconv.Atoi(val)
 	if err != nil {

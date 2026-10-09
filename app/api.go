@@ -45,12 +45,12 @@ func releaseCapturer() {
 
 func handleFrame(c *gin.Context) {
 	borders := Borders{
-		left:   getQueryAsInt(c, "left", 0),
-		right:  getQueryAsInt(c, "right", 0),
-		top:    getQueryAsInt(c, "top", 0),
-		bottom: getQueryAsInt(c, "bottom", 0),
+		left:   getQueryParamAsInt(c, "left", 0),
+		right:  getQueryParamAsInt(c, "right", 0),
+		top:    getQueryParamAsInt(c, "top", 0),
+		bottom: getQueryParamAsInt(c, "bottom", 0),
 	}
-	resizeFactor := getQueryAsInt(c, "resize", 1)
+	resizeFactor := getQueryParamAsInt(c, "resize", 1)
 
 	cp, err := getCapturer()
 	if err != nil {
