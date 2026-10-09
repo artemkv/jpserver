@@ -1,6 +1,6 @@
 # JPServer
 
-**Play Japanese games and see an instant vocabulary list on your phone or tablet!**
+**Play Japanese games on PC and see an instant vocabulary break-down on your phone or tablet!**
 
 Starts web server with the endpoint allowing to retrieve the screenshot of the primary monitor.
 
