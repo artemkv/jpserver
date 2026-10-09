@@ -14,10 +14,10 @@ func LoadDotEnv() {
 	}
 }
 
-func GetOptionalString(key string, def string) string {
+func GetOptionalString(key string, def func() string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		return def
+		return def()
 	}
 	return val
 }

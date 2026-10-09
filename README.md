@@ -1,8 +1,9 @@
 # JPServer
 
-Play Japanese games and see an instant vocabulary list on your phone or tablet!
+**Play Japanese games and see an instant vocabulary list on your phone or tablet!**
 
 Starts web server with the endpoint allowing to retrieve the screenshot of the primary monitor.
+
 Intended to work in tandem with jpterminal mobile app.
 
 ## Techinical requirements
@@ -18,9 +19,11 @@ Intended to work in tandem with jpterminal mobile app.
 - Make sure your mobile phone and your laptop are connected to the same WiFi
 - Play!
 
-## Environment Variables
+## Configuration
 
-You can provide values for environment variables by creating '.env' (exactly like that, i.e. dot env) file next to the executable. For example:
+We try to auto-detect the most suitable configuration parameters, but you can override the defaults using the environment variables.
+
+You can provide values for environment variables by creating `.env` (exactly like that, i.e. dot env) file next to the executable. For example:
 
 ```
 JPSERVER_HOST=192.168.0.13
@@ -30,20 +33,22 @@ JPSERVER_CODE=824230
 
 `JPSERVER_HOST`
 
-Optional, allows to configure the interface to listen on (IP address of your network).
+Optional. Allows to configure the interface to listen on (the IP address of your network).
+
 But default, we try to auto-detect your local network IP and use it.
+
 If autodetect fails, defaults to empty string (same as "0.0.0.0", meaning "listen on all interfaces").
+
 If you want to set it manually, use `ipconfig` to see the information about your network interfaces.
 
 `JPSERVER_PORT`
 
-Optional, allows to configure the port to listen on; defaults to "9999".
-Change this if, for some reason, the port is already in use.
+Optional. Allows to configure the port to listen on; defaults to the first available port between `9991` and `9999`.
+Change this if, for some reason, the whole range is already in use.
 
 `JPSERVER_CODE`
 
-Allows to specify fixed access code.
-If not provided, the new access code is generated every time randomly.
+Optional, allows to specify a fixed access code. By default, the new random access code is generated every time.
 
 ## API
 
