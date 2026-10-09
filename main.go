@@ -6,10 +6,12 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 
 	"artemkv.net/jpserver/app"
 	"artemkv.net/jpserver/server"
 	"github.com/gin-gonic/gin"
+	"github.com/mdp/qrterminal/v4"
 )
 
 func main() {
@@ -30,7 +32,9 @@ func main() {
 			log.Fatal("Could not generate the access code")
 		}
 	}
-	fmt.Printf("***** ENDPOINT: %s, ACCESS CODE: %s *****\n", endpoint, accessCode)
+
+	// show how to connect
+	showConnectionInfo(endpoint, accessCode)
 
 	// configure router
 	gin.SetMode(gin.ReleaseMode)
@@ -62,4 +66,16 @@ func generateAccessCode() (string, error) {
 		buffer[i] = table[b%byte(len(table))]
 	}
 	return string(buffer), nil
+}
+
+func showConnectionInfo(endpoint string, accessCode string) {
+	fmt.Printf("***** ENDPOINT: %s, ACCESS CODE: %s *****\n", endpoint, accessCode)
+	config := qrterminal.Config{
+		Level:     qrterminal.M,
+		Writer:    os.Stdout,
+		BlackChar: "  ",
+		WhiteChar: "██",
+		QuietZone: 1,
+	}
+	qrterminal.GenerateWithConfig(fmt.Sprintf("%s|%s", endpoint, accessCode), config)
 }
