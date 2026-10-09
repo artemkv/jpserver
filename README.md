@@ -7,7 +7,6 @@ The web server that exposes the endpoint allowing to retrieve the screenshot of 
 ```
 JPSERVER_HOST=192.168.0.13
 JPSERVER_PORT=9999
-JPSERVER_ALLOW_ORIGIN=https://localhost
 JPSERVER_CODE=824230
 ```
 
@@ -20,11 +19,6 @@ If fails to autodetect, defaults to empty string (same as "0.0.0.0")
 `JPSERVER_PORT`
 
 Optional, allows to configure the port to listen on; defaults to "9999"
-
-`JPSERVER_ALLOW_ORIGIN`
-
-Optional, allows to configure the allowed origin for CORS; defaults to "https://localhost"
-This should match the origin of the running app (reported in the log for every request)
 
 `JPSERVER_CODE`
 

@@ -7,25 +7,32 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(router *gin.Engine, allowedOrigins string, accessCode string) {
+func SetupRouter(router *gin.Engine, accessCode string) {
 	// setup logger
 	router.Use(requestLogger())
 
 	// setup CORS
-	allowedOriginsArr := strings.Split(allowedOrigins, ",")
-	router.Use(cors.New(getCorsConfig(allowedOriginsArr)))
+	router.Use(cors.New(getCorsConfig()))
 
 	// do business
 	router.GET("/frame", HandleWithAccessCode(accessCode, handleFrame))
 
 	// handle 404
 	router.NoRoute(notFoundHandler())
+}
+
+func getCorsConfig() cors.Config {
+	return cors.Config{
+		AllowOrigins:  []string{"*"},
+		AllowHeaders:  []string{"*"},
+		AllowMethods:  []string{"*"},
+		ExposeHeaders: []string{"*"},
+	}
 }
 
 func HandleWithAccessCode(accessCode string, handler gin.HandlerFunc) gin.HandlerFunc {
@@ -36,15 +43,6 @@ func HandleWithAccessCode(accessCode string, handler gin.HandlerFunc) gin.Handle
 			return
 		}
 		handler(c)
-	}
-}
-
-func getCorsConfig(allowedOrigins []string) cors.Config {
-	return cors.Config{
-		AllowOrigins:  allowedOrigins,
-		AllowHeaders:  []string{"*"},
-		AllowMethods:  []string{"*"},
-		ExposeHeaders: []string{"*"},
 	}
 }
 
@@ -86,11 +84,10 @@ func toInternalServerError(c *gin.Context, errText string) {
 
 func requestLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		message := fmt.Sprintf("%s %s %s (Origin: %s)",
+		message := fmt.Sprintf("%s %s %s",
 			c.ClientIP(),
 			c.Request.Method,
-			c.Request.URL.Path,
-			c.Request.Header.Get("Origin"),
+			c.Request.URL.String(),
 		)
 		log.Print(message)
 	}

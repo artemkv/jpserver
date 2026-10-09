@@ -33,11 +33,9 @@ func main() {
 	fmt.Printf("***** ENDPOINT: %s, ACCESS CODE: %s *****\n", endpoint, accessCode)
 
 	// configure router
-	allowedOrigins := GetOptionalString(
-		"JPSERVER_ALLOW_ORIGIN", "https://localhost")
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	app.SetupRouter(router, allowedOrigins, accessCode)
+	app.SetupRouter(router, accessCode)
 
 	// start the server
 	server.Serve(router, endpoint)
