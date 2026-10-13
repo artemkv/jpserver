@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/draw"
 	"image/png"
+	"time"
 
 	dda "github.com/shinkar94/godesktopdup"
 	xdraw "golang.org/x/image/draw"
@@ -13,6 +14,7 @@ import (
 
 const PRIMARY_MONITOR = 0
 const FRAME_CAPTURE_TIMEOUT = 1000
+const MAX_ATTEMPTS int = 10
 
 // In % of the screen
 type Borders struct {
@@ -75,16 +77,19 @@ func (c *Capturer) Close() {
 }
 
 func (c *Capturer) CaptureFrame() error {
-	for {
+	for range MAX_ATTEMPTS {
 		err := c.dd.GetFrameBGRA(c.buffer, FRAME_CAPTURE_TIMEOUT)
 		if err != nil {
 			if err.Error() == "no image yet" {
+				time.Sleep(10 * time.Millisecond)
 				continue
 			}
 			return fmt.Errorf("failed to capture frame: %w", err)
 		}
 		return nil
 	}
+	fmt.Println("premature return")
+	return nil
 }
 
 func (c *Capturer) ConvertToPNG(borders Borders, resizeFactor int) ([]byte, error) {
