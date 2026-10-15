@@ -107,5 +107,5 @@ func showConnectionInfo(addr string, accessCode string) {
 		WhiteChar: "██",
 		QuietZone: 1,
 	}
-	qrterminal.GenerateWithConfig(fmt.Sprintf("%s|%s", addr, accessCode), config)
+	qrterminal.GenerateWithConfig(fmt.Sprintf("gengocatch|%s|%s", addr, accessCode), config)
 }
